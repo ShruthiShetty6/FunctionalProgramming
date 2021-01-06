@@ -1,4 +1,5 @@
 import React from "react";
+import { always, cond, equals } from "ramda";
 const ops = {
   ADD: "+",
   SUB: "-",
@@ -49,16 +50,13 @@ class Visitor extends React.Component {
     const rightNode = isNaN(this.visitNode(node.right))
       ? this.visitNode(node.right)
       : +this.visitNode(node.right);
-    switch (operator) {
-      case ops.ADD:
-        return leftNode + rightNode;
-      case ops.SUB:
-        return leftNode - rightNode;
-      case ops.DIV:
-        return leftNode / rightNode;
-      case ops.MUL:
-        return leftNode * rightNode;
-    }
+    const result = cond([
+      [equals(ops.ADD), always(leftNode + rightNode)],
+      [equals(ops.SUB), always(leftNode - rightNode)],
+      [equals(ops.DIV), always(leftNode / rightNode)],
+      [equals(ops.MUL), always(leftNode * rightNode)],
+    ]);
+    return result(operator);
   }
   evalArgs(nodeArgs) {
     let g = [];
