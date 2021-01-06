@@ -16,30 +16,31 @@ const App = () => {
   let pos = useRef(0);
 
   const inputRef = useRef(null);
-  let consoleField = inputRef.current;
+  let Value = inputRef.current;
   const updateInputValue = () => {
     setInputValue(inputRef.current.value);
   };
 
   React.useEffect(() => {
-    const createKeyUpShiftEnter$ = fromEvent(consoleField, "keyup").pipe(
+    const Observable$ = fromEvent(Value, "keyup").pipe(
       filter((e) => e.keyCode === 13 && !e.shiftKey)
     );
-    const createKeyUpWithCustomKey = (htmlTag, KEYBOARD_KEY) =>
-      fromEvent(htmlTag, "keyup").pipe(filter((e) => e.key === KEYBOARD_KEY));
 
-    if (consoleField !== null || undefined) {
-      createKeyUpShiftEnter$.subscribe((e) => {
+    if (Value !== null || undefined) {
+      Observable$.subscribe((e) => {
         e.preventDefault();
       });
 
-      let fieldWhileArrowUp = createKeyUpWithCustomKey(consoleField, "ArrowUp");
-      let fieldWhileArrowDown = createKeyUpWithCustomKey(
-        consoleField,
+      const getPreviousData = (element, arrow_func) =>
+        fromEvent(element, "keyup").pipe(filter((e) => e.key === arrow_func));
+
+      let clickArrowUp = getPreviousData(Value, "ArrowUp");
+      let clickArrowDown = getPreviousData(
+        Value,
         "ArrowDown"
       );
 
-      fieldWhileArrowUp.subscribe(() => {
+      clickArrowUp.subscribe(() => {
         if (recentValues.length > 0 && pos.current >= 0) {
           setInputValue(
             recentValues[pos.current] ? recentValues[pos.current] : ""
@@ -48,7 +49,7 @@ const App = () => {
         }
       });
 
-      fieldWhileArrowDown.subscribe(() => {
+      clickArrowDown.subscribe(() => {
         if (recentValues.length > 0 && pos.current < recentValues.length) {
           setInputValue(
             recentValues[pos.current] ? recentValues[pos.current] : ""
@@ -84,6 +85,7 @@ const App = () => {
           setPrevData((prevHistory) => [...prevHistory, finalResult]);
           setInputValueHistory((prevValue) => [...prevValue, value]);
           recentValues.push(...inputValueHistory, value);
+          console.log("finalResult", recentValues);
           pos.current = recentValues.length; // intermiediatary
           setInputValue("");
         } catch {}
@@ -92,10 +94,7 @@ const App = () => {
   };
 
   const showPrevData = (item, index) => (
-    <div
-      key={index}
-      style={{ height: "45px", border: "1px solid", textAlign: "left" }}
-    >
+    <div key={index} style={{ height: "45px", textAlign: "left" }}>
       <span style={{ color: "red" }}>{"> "}</span>
       {item}
     </div>
